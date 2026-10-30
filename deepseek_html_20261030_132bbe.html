@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lista Must Do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:      #0b1220;
+    --ink-2:    #475569;
+    --ink-3:    #94a3b8;
+    --blue:     #2563eb;
+    --blue-2:   #0ea5e9;
+    --pink:     #ec4899;
+    --pink-2:   #f43f5e;
+    --teal:     #14b8a6;
+    --r-xl: 26px;
+    --r-lg: 22px;
+    --r-md: 18px;
+    --r-sm: 14px;
+    --glass-hi: rgba(255,255,255,.92);
+    --glass-lo: rgba(255,255,255,.72);
+    --shadow-card:
+      0 1px 2px rgba(15,23,42,.05),
+      0 8px 22px -6px rgba(15,23,42,.10),
+      0 24px 48px -18px rgba(30,64,175,.18),
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 -1px 0 rgba(15,23,42,.04);
+    --shadow-item:
+      0 1px 2px rgba(15,23,42,.05),
+      0 6px 16px -4px rgba(15,23,42,.08),
+      inset 0 1px 0 rgba(255,255,255,1);
+    --shadow-btn:
+      0 1px 2px rgba(37,99,235,.35),
+      0 8px 20px -6px rgba(37,99,235,.55),
+      inset 0 1px 0 rgba(255,255,255,.32),
+      inset 0 -2px 0 rgba(0,0,0,.12);
+    --ring-pink: 0 0 0 4px rgba(236,72,153,.20);
+    --ring-blue: 0 0 0 4px rgba(37,99,235,.20);
+  }
+
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body{ height: 100%; }
+
+  body{
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+    background: linear-gradient(160deg, #bfdbfe 0%, #e9d5ff 40%, #fbcfe8 70%, #a7f3d0 100%);
+  }
+
+  ::selection{ background: rgba(236,72,153,.25); }
+
+  /* ==========================================================
+     FUNDO ABSTRATO — blobs saturados + grão sutil
+     ========================================================== */
+  .bg{ position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+
+  .blob{
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  .b1{
+    width: 580px; height: 580px; top: -220px; left: -200px;
+    background: radial-gradient(circle at 45% 45%, rgba(37,99,235,.55), rgba(37,99,235,0) 68%);
+    animation: drift1 34s ease-in-out infinite;
+  }
+  .b2{
+    width: 640px; height: 640px; bottom: -260px; right: -240px;
+    background: radial-gradient(circle at 55% 45%, rgba(236,72,153,.52), rgba(236,72,153,0) 66%);
+    animation: drift2 40s ease-in-out infinite;
+  }
+  .b3{
+    width: 480px; height: 480px; top: 30%; right: -200px;
+    background: radial-gradient(circle at 50% 50%, rgba(14,165,233,.48), rgba(14,165,233,0) 70%);
+    animation: drift3 36s ease-in-out infinite;
+  }
+  .b4{
+    width: 420px; height: 420px; bottom: 6%; left: -180px;
+    background: radial-gradient(circle at 50% 50%, rgba(20,184,166,.42), rgba(20,184,166,0) 70%);
+    animation: drift4 44s ease-in-out infinite;
+  }
+
+  @keyframes drift1{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%    { transform: translate(38px,28px) scale(1.06); }
+  }
+  @keyframes drift2{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%    { transform: translate(-44px,-28px) scale(1.05); }
+  }
+  @keyframes drift3{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%    { transform: translate(-30px,36px) scale(1.08); }
+  }
+  @keyframes drift4{
+    0%,100%{ transform: translate(0,0) scale(1); }
+    50%    { transform: translate(32px,-24px) scale(1.04); }
+  }
+
+  .grain{
+    position: absolute;
+    inset: 0;
+    opacity: .22;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .blob{ animation: none; }
+  }
+
+  /* ==========================================================
+     ESTRUTURA
+     ========================================================== */
+  .shell{
+    position: relative;
+    z-index: 1;
+    width: min(100vw, 400px);
+    height: min(100dvh, 860px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 32px 20px 22px;
+  }
+
+  .glass{
+    background: linear-gradient(180deg, var(--glass-hi) 0%, var(--glass-lo) 100%);
+    border: 1px solid rgba(255,255,255,.95);
+    box-shadow: var(--shadow-card);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    backdrop-filter: blur(24px) saturate(200%);
+  }
+
+  /* ==========================================================
+     CABEÇALHO
+     ========================================================== */
+  .date{
+    margin: 0 0 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #1e3a8a;
+  }
+  h1{
+    margin: 0;
+    font-weight: 800;
+    font-size: 36px;
+    line-height: 1.04;
+    letter-spacing: -.04em;
+    background: linear-gradient(135deg, #0b1220 0%, #1e40af 55%, #9d174d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #0b1220;
+  }
+
+  /* ==========================================================
+     PROGRESSO
+     ========================================================== */
+  .progress{
+    padding: 16px 18px 18px;
+    border-radius: var(--r-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .progress-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+  .progress-row #percent{
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+    font-size: 14px;
+  }
+  .track{
+    height: 7px;
+    border-radius: 99px;
+    background: rgba(15,23,42,.09);
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(15,23,42,.06);
+  }
+  .fill{
+    height: 100%;
+    width: 0;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #2563eb 0%, #8b5cf6 45%, #ec4899 100%);
+    transition: width .5s cubic-bezier(.22,1,.36,1);
+    box-shadow:
+      0 0 12px rgba(236,72,153,.45),
+      inset 0 1px 0 rgba(255,255,255,.4);
+  }
+
+  /* ==========================================================
+     ADICIONAR (box)
+     ========================================================== */
+  .add{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border-radius: var(--r-lg);
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .add:focus-within{
+    border-color: rgba(37,99,235,.55);
+    box-shadow: var(--shadow-card), var(--ring-blue);
+  }
+
+  .input-wrap{
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap input{
+    width: 100%;
+    height: 46px;
+    padding: 0 40px 0 14px;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font: 500 16px/1 'Inter', system-ui, sans-serif;
+    letter-spacing: -.005em;
+    color: var(--ink);
+  }
+  .input-wrap input::placeholder{
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+
+  .input-clear{
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%) scale(.9);
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(15,23,42,.08);
+    color: var(--ink-2);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease, background .15s ease;
+  }
+  .add.has-text .input-clear{
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scale(1);
+  }
+  .input-clear:hover{ background: rgba(15,23,42,.14); }
+  .input-clear:active{ transform: translateY(-50%) scale(.9); }
+
+  .add-btn{
+    height: 46px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
+    color: #fff;
+    font: 700 14px/1 'Inter', system-ui, sans-serif;
+    letter-spacing: .01em;
+    cursor: pointer;
+    box-shadow: var(--shadow-btn);
+    transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .add-btn:hover{
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 2px rgba(37,99,235,.4),
+      0 12px 26px -6px rgba(37,99,235,.6),
+      inset 0 1px 0 rgba(255,255,255,.35),
+      inset 0 -2px 0 rgba(0,0,0,.12);
+  }
+  .add-btn:active{
+    transform: translateY(0) scale(.97);
+    box-shadow:
+      0 1px 2px rgba(37,99,235,.4),
+      0 4px 10px -4px rgba(37,99,235,.5),
+      inset 0 1px 0 rgba(255,255,255,.25),
+      inset 0 -2px 0 rgba(0,0,0,.15);
+  }
+  .add-btn:focus-visible{
+    outline: none;
+    box-shadow: var(--shadow-btn), var(--ring-blue);
+  }
+
+  /* ==========================================================
+     SEPARADORES
+     ========================================================== */
+  .tabs{
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 99px;
+    background: linear-gradient(180deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,.68) 100%);
+    border: 1px solid rgba(255,255,255,.95);
+    -webkit-backdrop-filter: blur(20px) saturate(200%);
+    backdrop-filter: blur(20px) saturate(200%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      0 4px 12px -4px rgba(15,23,42,.08);
+  }
+  .tab{
+    flex: 1;
+    height: 34px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 99px;
+    background: transparent;
+    font: 600 13px/1 'Inter', system-ui, sans-serif;
+    letter-spacing: .01em;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .1s ease;
+  }
+  .tab:hover{ color: var(--ink); }
+  .tab:active{ transform: scale(.97); }
+  .tab.active{
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+    box-shadow:
+      0 2px 4px rgba(37,99,235,.35),
+      0 6px 14px -4px rgba(37,99,235,.5),
+      inset 0 1px 0 rgba(255,255,255,.3),
+      inset 0 -1px 0 rgba(0,0,0,.1);
+  }
+
+  /* ==========================================================
+     LISTA
+     ========================================================== */
+  .list{
+    list-style: none;
+    margin: 0;
+    padding: 2px 2px 2px 0;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15,23,42,.18) transparent;
+  }
+  .list::-webkit-scrollbar{ width: 6px; }
+  .list::-webkit-scrollbar-thumb{
+    background: rgba(15,23,42,.16);
+    border-radius: 99px;
+  }
+  .list::-webkit-scrollbar-track{ background: transparent; }
+
+  .item{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 6px;
+    border-radius: var(--r-md);
+    background: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.82) 100%);
+    border: 1px solid rgba(255,255,255,1);
+    box-shadow: var(--shadow-item);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    animation: itemIn .38s cubic-bezier(.22,1,.36,1) both;
+    transition: box-shadow .2s ease, border-color .2s ease, transform .15s ease;
+  }
+  .item:hover{
+    border-color: rgba(37,99,235,.25);
+    box-shadow:
+      0 1px 2px rgba(15,23,42,.05),
+      0 10px 22px -6px rgba(15,23,42,.12),
+      inset 0 1px 0 rgba(255,255,255,1);
+  }
+  .item.removing{
+    animation: itemOut .2s ease forwards;
+    pointer-events: none;
+  }
+
+  @keyframes itemIn{
+    from{ opacity: 0; transform: translateY(8px) scale(.98); }
+    to  { opacity: 1; transform: none; }
+  }
+  @keyframes itemOut{
+    to{ opacity: 0; transform: translateX(14px) scale(.96); }
+  }
+
+  .check{
+    width: 42px;
+    height: 42px;
+    flex: none;
+    border: 0;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  .box{
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.6px solid rgba(15,23,42,.28);
+    display: grid;
+    place-items: center;
+    transition: background .25s ease, border-color .25s ease, box-shadow .25s ease, transform .2s ease;
+  }
+  .box svg{
+    opacity: 0;
+    transform: scale(.5);
+    transition: opacity .2s ease .02s, transform .3s cubic-bezier(.22,1.6,.4,1) .02s;
+  }
+  .item.done .box{
+    background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+    border-color: transparent;
+    box-shadow:
+      0 3px 10px rgba(236,72,153,.45),
+      inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .item.done .box svg{
+    opacity: 1;
+    transform: scale(1);
+  }
+  .check:active .box{ transform: scale(.9); }
+
+  .text{
+    flex: 1;
+    min-width: 0;
+    font-size: 15.5px;
+    line-height: 1.35;
+    font-weight: 500;
+    letter-spacing: -.005em;
+    overflow-wrap: anywhere;
+    color: var(--ink);
+    transition: color .25s ease;
+  }
+  .item.done .text{
+    color: var(--ink-3);
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    text-decoration-color: rgba(148,163,184,.6);
+    font-weight: 400;
+  }
+
+  .del{
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border: 0;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: var(--ink-3);
+    opacity: .6;
+    transition: opacity .18s ease, color .18s ease, background .18s ease;
+  }
+  .del:hover{ opacity: 1; color: #ef4444; background: rgba(239,68,68,.10); }
+  .del:active{ transform: scale(.92); }
+
+  /* ---------- empty ---------- */
+  .empty{
+    padding: 48px 18px 40px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--ink-3);
+    animation: itemIn .4s ease both;
+  }
+  .empty-icon{
+    color: #a5b4fc;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 4px 12px rgba(99,102,241,.25));
+  }
+  .empty-title{
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink-2);
+    letter-spacing: -.01em;
+  }
+  .empty-sub{
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+
+  /* ==========================================================
+     LIMPAR
+     ========================================================== */
+  .clear{
+    height: 48px;
+    border-radius: var(--r-md);
+    font: 600 13.5px/1 'Inter', system-ui, sans-serif;
+    letter-spacing: .01em;
+    cursor: pointer;
+    color: var(--ink-2);
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .clear:hover{
+    color: var(--ink);
+    border-color: rgba(236,72,153,.35);
+    box-shadow:
+      var(--shadow-card),
+      0 0 0 4px rgba(236,72,153,.10);
+  }
+  .clear:active{ transform: scale(.995); }
+  .clear:disabled{
+    opacity: .45;
+    cursor: default;
+    box-shadow: var(--shadow-card);
+  }
+  .clear:disabled:hover{
+    color: var(--ink-2);
+    border-color: rgba(255,255,255,.95);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ==========================================================
+     FOCO
+     ========================================================== */
+  :focus-visible{
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <span class="blob b1"></span>
+  <span class="blob b2"></span>
+  <span class="blob b3"></span>
+  <span class="blob b4"></span>
+  <span class="grain"></span>
+</div>
+
+<main class="shell">
+
+  <header>
+    <p class="date" id="date"></p>
+    <h1>Lista<br>Must Do</h1>
+  </header>
+
+  <section class="glass progress" aria-label="Progresso">
+    <div class="progress-row">
+      <span id="counter">0 por fazer</span>
+      <span id="percent">0%</span>
+    </div>
+    <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressbar">
+      <div class="fill" id="fill"></div>
+    </div>
+  </section>
+
+  <!-- ADICIONAR: sem <form>, handlers explícitos -->
+  <div class="glass add" id="addBox">
+    <label for="input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Nova tarefa</label>
+    <div class="input-wrap">
+      <input id="input" type="text" placeholder="Nova tarefa…" maxlength="180" enterkeyhint="done" autocomplete="off">
+      <button type="button" class="input-clear" id="inputClear" aria-label="Limpar campo">
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M3 3l6 6M9 3l-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <button type="button" class="add-btn" id="addBtn">Adicionar</button>
+  </div>
+
+  <nav class="tabs" id="tabs" aria-label="Filtro de tarefas">
+    <button type="button" class="tab active" data-filter="all"  aria-pressed="true">Todas</button>
+    <button type="button" class="tab"        data-filter="open" aria-pressed="false">Por fazer</button>
+    <button type="button" class="tab"        data-filter="done" aria-pressed="false">Feitas</button>
+  </nav>
+
+  <ul class="list" id="list"></ul>
+
+  <button type="button" class="glass clear" id="clear" disabled>Limpar concluídas</button>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'lista-must-do-v4';
+
+  var state = {
+    filter: 'all',
+    next: 1,
+    todos: []
+  };
+
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      var saved = JSON.parse(raw);
+      if (saved && Array.isArray(saved.todos)) {
+        state.todos = saved.todos;
+        state.next = typeof saved.next === 'number'
+          ? saved.next
+          : saved.todos.reduce(function (m, t) { return Math.max(m, t.id || 0); }, 0) + 1;
+      }
+    }
+  } catch (e) { /* sem persistência */ }
+
+  var listEl    = document.getElementById('list');
+  var fillEl    = document.getElementById('fill');
+  var counterEl = document.getElementById('counter');
+  var percentEl = document.getElementById('percent');
+  var progEl    = document.getElementById('progressbar');
+  var dateEl    = document.getElementById('date');
+  var inputEl   = document.getElementById('input');
+  var inputClr  = document.getElementById('inputClear');
+  var addBtn    = document.getElementById('addBtn');
+  var addBox    = document.getElementById('addBox');
+  var clearBtn  = document.getElementById('clear');
+  var tabsEl    = document.getElementById('tabs');
+
+  var CHECK_SVG = '<svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true">' +
+    '<path d="M2.6 7.5l3 3 5.8-6.2" fill="none" stroke="#ffffff" stroke-width="2.1" ' +
+    'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var DEL_SVG = '<svg viewBox="0 0 18 18" width="15" height="15" aria-hidden="true">' +
+    '<path d="M4.6 4.6l8.8 8.8M13.4 4.6l-8.8 8.8" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.7" stroke-linecap="round"/></svg>';
+
+  var EMPTY_SVG = '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">' +
+    '<circle cx="32" cy="32" r="26" stroke="currentColor" stroke-opacity=".5" ' +
+    'stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round"/>' +
+    '<path d="M22 33.5l7 7 14-15" stroke="currentColor" stroke-opacity=".85" ' +
+    'stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ todos: state.todos, next: state.next }));
+    } catch (e) { /* ignora */ }
+  }
+
+  function todayLabel() {
+    var s = new Date().toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function matchesFilter(t) {
+    if (state.filter === 'open') return !t.done;
+    if (state.filter === 'done') return t.done;
+    return true;
+  }
+
+  function buildItem(t) {
+    var li = document.createElement('li');
+    li.className = 'item' + (t.done ? ' done' : '');
+    li.dataset.id = String(t.id);
+
+    var check = document.createElement('button');
+    check.type = 'button';
+    check.className = 'check';
+    check.dataset.action = 'toggle';
+    check.setAttribute('aria-label', t.done ? 'Marcar como por fazer' : 'Marcar como feita');
+    check.innerHTML = '<span class="box">' + CHECK_SVG + '</span>';
+
+    var span = document.createElement('span');
+    span.className = 'text';
+    span.textContent = t.text;
+
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'del';
+    del.dataset.action = 'remove';
+    del.setAttribute('aria-label', 'Apagar tarefa');
+    del.innerHTML = DEL_SVG;
+
+    li.appendChild(check);
+    li.appendChild(span);
+    li.appendChild(del);
+    return li;
+  }
+
+  function sync() {
+    var total = state.todos.length;
+    var done = state.todos.reduce(function (a, t) { return a + (t.done ? 1 : 0); }, 0);
+    var open = total - done;
+    var pct = total ? Math.round((done / total) * 100) : 0;
+
+    counterEl.textContent = open + ' por fazer';
+    percentEl.textContent = pct + '%';
+    fillEl.style.width = pct + '%';
+    progEl.setAttribute('aria-valuenow', String(pct));
+
+    clearBtn.disabled = done === 0;
+
+    Array.prototype.forEach.call(tabsEl.querySelectorAll('.tab'), function (b) {
+      var active = b.dataset.filter === state.filter;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function render() {
+    dateEl.textContent = todayLabel();
+
+    var shown = state.todos.filter(matchesFilter);
+    listEl.textContent = '';
+
+    if (!shown.length) {
+      var li = document.createElement('li');
+      li.className = 'empty';
+      var isEmpty = state.todos.length === 0;
+      li.innerHTML =
+        '<div class="empty-icon">' + EMPTY_SVG + '</div>' +
+        '<p class="empty-title">' + (isEmpty ? 'A lista está vazia' : 'Nada por aqui') + '</p>' +
+        '<p class="empty-sub">' + (isEmpty
+          ? 'Adiciona a tua primeira tarefa acima.'
+          : 'Muda o filtro ou adiciona uma tarefa.') + '</p>';
+      listEl.appendChild(li);
+    } else {
+      shown.forEach(function (t, i) {
+        var li = buildItem(t);
+        li.style.animationDelay = Math.min(i * 30, 240) + 'ms';
+        listEl.appendChild(li);
+      });
+    }
+
+    sync();
+  }
+
+  function addTodo(text) {
+    var todo = { id: state.next, text: text, done: false };
+    state.next += 1;
+    state.todos.unshift(todo);
+    save();
+
+    if (state.filter === 'done') {
+      state.filter = 'all';
+      render();
+      return;
+    }
+
+    var empty = listEl.querySelector('.empty');
+    if (empty) empty.remove();
+
+    var li = buildItem(todo);
+    li.style.animationDelay = '0ms';
+    listEl.prepend(li);
+
+    sync();
+  }
+
+  /* ---------- HANDLE ADD (bulletproof) ---------- */
+  var adding = false;
+  function handleAdd() {
+    if (adding) return;
+    var text = inputEl.value.trim();
+    if (!text) {
+      inputEl.focus();
+      return;
+    }
+    adding = true;
+
+    inputEl.value = '';
+    addBox.classList.remove('has-text');
+    addTodo(text);
+    inputEl.focus();
+
+    setTimeout(function () { adding = false; }, 50);
+  }
+
+  addBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    handleAdd();
+  });
+
+  inputEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAdd();
+    }
+  });
+
+  inputEl.addEventListener('input', function () {
+    addBox.classList.toggle('has-text', inputEl.value.length > 0);
+  });
+
+  inputClr.addEventListener('click', function () {
+    inputEl.value = '';
+    addBox.classList.remove('has-text');
+    inputEl.focus();
+  });
+
+  /* ---------- toggle / remove ---------- */
+  function toggleTodo(id) {
+    var t = state.todos.filter(function (x) { return x.id === id; })[0];
+    if (!t) return;
+    t.done = !t.done;
+    save();
+
+    var li = listEl.querySelector('.item[data-id="' + id + '"]');
+    var visible = matchesFilter(t);
+
+    if (li && !visible) {
+      li.classList.add('removing');
+      setTimeout(render, 200);
+    } else if (li) {
+      li.classList.toggle('done', t.done);
+      li.querySelector('.check').setAttribute(
+        'aria-label', t.done ? 'Marcar como por fazer' : 'Marcar como feita'
+      );
+    } else {
+      render();
+      return;
+    }
+    sync();
+  }
+
+  function removeTodo(id) {
+    var li = listEl.querySelector('.item[data-id="' + id + '"]');
+    state.todos = state.todos.filter(function (t) { return t.id !== id; });
+    save();
+
+    if (li) {
+      li.classList.add('removing');
+      setTimeout(render, 200);
+    } else {
+      render();
+    }
+    sync();
+  }
+
+  listEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    var id = Number(btn.closest('.item').dataset.id);
+    if (btn.dataset.action === 'toggle') toggleTodo(id);
+    else if (btn.dataset.action === 'remove') removeTodo(id);
+  });
+
+  /* ---------- filtros ---------- */
+  tabsEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('.tab');
+    if (!btn) return;
+    if (btn.dataset.filter === state.filter) return;
+    state.filter = btn.dataset.filter;
+    render();
+  });
+
+  /* ---------- limpar ---------- */
+  clearBtn.addEventListener('click', function () {
+    state.todos = state.todos.filter(function (t) { return !t.done; });
+    save();
+    render();
+  });
+
+  /* ---------- arranque ---------- */
+  render();
+})();
+</script>
+</body>
+</html>
